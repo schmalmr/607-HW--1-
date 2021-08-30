@@ -1,0 +1,116 @@
+---
+title: "607 Week 1 Assignment - Presidential Management of Covid (US surveys)"
+output:
+  pdf_document: 
+    toc: yes
+    number_sections: yes
+    keep_tex: yes
+  html_document: 
+    toc: yes
+    keep_md: yes
+editor_options: 
+  
+author: "Mark Schmalfeld"
+date: "8/27/2021"
+Overview:  How do Americans view Biden's response to the Corovirus
+Link to article:  https://projects.fivethirtyeight.com/coronavirus-polls/
+Introduction:  Survey conducted over time of American view of both Trump and 
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(readr)
+require(dplyr)
+require(ggplot2)
+require(RCurl)
+require(tidyverse)
+
+
+#Import data using Github raw data URL for original data file.   Provides data on various survey's of the public perception of how effective two US Presidents were in handling the Covid Pandemic with approval or disapproval rating (%) 
+#urlfile="https://raw.githubusercontent.com/schmalmr/Project_2_Aug2021/main/CapacityData.csv"
+#https://raw.githubusercontent.com/schmalmr/607-HW-1/main/covid_approval_polls_no_url.csv
+
+urlfile<-"https://raw.githubusercontent.com/schmalmr/607-HW-1/main/covid_approval_polls_no_url.csv" 
+dataimport_Covid<-read_csv(url(urlfile))
+
+#dataimport_Covid<-data_frame(covid_approval_polls)
+dataimport_Covid<-data_frame(dataimport_Covid)
+dataimport_Covid
+
+# Check import with view of data and confirm dataset dimensions and colnames
+view(dataimport_Covid)
+dim(dataimport_Covid)
+colnames(dataimport_Covid)
+
+#Select columns in the dataimporv_Covid and reorder columns  
+dataimport_Covid2<-dataimport_Covid[, c("subject","party", "sample_size","population","pollster","approve", "disapprove","end_date")]
+
+#Check new data table dimensions and view data 
+dim(dataimport_Covid2)
+#view(dataimport_Covid2)
+
+#Rename Columns with new name.  Rename the subject col to Active_President for col name.
+
+library(dplyr)
+dataimport_Covid2<-rename(dataimport_Covid2, c(active_president=subject))
+
+# Add longer descriptive name for the data characters in the population and party columns. 
+
+dataimport_Covid2$population<-as.character(dataimport_Covid2$population)
+dataimport_Covid2$population[dataimport_Covid2$population=="a"]<-"adult_voter"
+dataimport_Covid2$population[dataimport_Covid2$population=="rv"]<-"registered_voter"
+dataimport_Covid2$population[dataimport_Covid2$population=="lv"]<-"likely_voter"
+dataimport_Covid2$population<-as.factor(dataimport_Covid2$population)
+
+
+dataimport_Covid2$party<-as.character(dataimport_Covid2$party)
+dataimport_Covid2$party[dataimport_Covid2$party=="R"]<-"republican_voter"
+dataimport_Covid2$party[dataimport_Covid2$party=="D"]<-"democract_voter"
+dataimport_Covid2$party[dataimport_Covid2$party=="I"]<-"independent_voter"
+dataimport_Covid2$party[dataimport_Covid2$party=="all"]<-"all_political_parties"
+dataimport_Covid2$party<-as.factor(dataimport_Covid2$party)
+dataimport_Covid2<-tibble(dataimport_Covid2)
+
+#Check col name changes, dimensions and a view of the data file to see the changes are completed. 
+colnames(dataimport_Covid2)
+dim(dataimport_Covid2)
+view(dataimport_Covid2)
+
+#Graph data in a couple of plots to evaluate the basic data results in a scatter plot.  Use end_date of survey for date marker. # Evaluate relative approval statistics due to political party, president in office over time.
+
+ggplot(dataimport_Covid2, aes(x=end_date,y=approve,shape=party))+geom_point(size=2)+scale_shape_manual(values=c(21,24,12,4))
+
+ggplot(dataimport_Covid2, aes(x=end_date,y=approve,shape=party,fill=active_president))+geom_point(size=2)+scale_shape_manual(values=c(21,24,23,25))+scale_fill_manual(values=c("blue","red"),guide=guide_legend(override.aes = list(shape=21)))
+
+
+
+
+
+
+
+
+
+```
+
+Conclusions / Finding or recommendations:
+
+This is preliminary screening data analysis and more could be done to improve graphics and evaluation of descret series.
+
+1) In general the overall long term approval of the Presidents actions to resolve Covid have improved over time but there are some indications that drifts in this approval level are occurring.  Overall- Biden's approval rating has been higher and this is likely related to his push for rapid vacination as he took office (likely also correlated with the availability of the vacine which we may find Trump to have enabled - need more informaiton to confirm)
+For both Presidents: Trump and Biden it appears the initial approval rating was highest at the start of their program announcements for Covid and both have seen some decline over time. 
+2) The approval ratings of the Presidents actions seem to be highly correlated with which party (Republican or Democrat) had the active sitting President.  Startlingly so, as the republican approval dropped from ~70% to ~30% range as Trump left office and Biden took office.  The opposite was true for the democrates where the approval jumped up from ~15% to almost 90% when Trump left office and Biden took office.  
+3) Independents maintained an overall higher rating at all times than the lowest party grouping and it tended to increase as Binden took office.  
+4) All political parties when grouped together show an up tick in approval as Biden took office (Likel also as he anounced his vacine program - more data needed to correlate this efffect).
+5) We can see the decline in approval as we moved into Aug 2021 which is likely related to the increasing impact of the additional variant (Delta, etc) of Covid and the time it is taking to return to "fully normal"  Again- no data to support this specific conclusion but this is the hypothesis based on what is occurring in the US based on recent news coverage.
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
